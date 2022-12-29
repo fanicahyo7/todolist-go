@@ -6,7 +6,7 @@ import (
 )
 
 type TodoListService interface {
-	GetByUserID(userID int64) ([]model.Todo, error)
+	GetByUserID(userID int) ([]model.Todo, error)
 	// GetByID(id int64) (*model.Todo, error)
 	// Create(todoList model.Todo) (int64, error)
 	// Update(todoList model.Todo) error
@@ -21,7 +21,7 @@ func NewTodoListService(repo repository.TodoListRepository) TodoListService {
 	return &todoListService{repo: repo}
 }
 
-func (s *todoListService) GetByUserID(userID int64) ([]model.Todo, error) {
+func (s *todoListService) GetByUserID(userID int) ([]model.Todo, error) {
 	todoLists, err := s.repo.GetByUserID(userID)
 	if err != nil {
 		return nil, err

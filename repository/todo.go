@@ -6,7 +6,7 @@ import (
 )
 
 type TodoListRepository interface {
-	GetByUserID(userID int64) ([]model.Todo, error)
+	GetByUserID(userID int) ([]model.Todo, error)
 	// GetByID(id int64) (*model.Todo, error)
 	// Create(todoList model.Todo) (int64, error)
 	// Update(todoList model.Todo) error
@@ -21,8 +21,8 @@ func NewTodoRepository(db *sql.DB) TodoListRepository {
 	return &todoListRepository{db: db}
 }
 
-func (r *todoListRepository) GetByUserID(userID int64) ([]model.Todo, error) {
-	rows, err := r.db.Query("SELECT id, title, created FROM todolists WHERE user_id = ?", userID)
+func (r *todoListRepository) GetByUserID(userID int) ([]model.Todo, error) {
+	rows, err := r.db.Query("SELECT id, title, created_at FROM todos WHERE id = ?", userID)
 	if err != nil {
 		return nil, err
 	}

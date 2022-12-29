@@ -43,8 +43,7 @@ func (h *todoHandler) GetTodos(c *fiber.Ctx) error {
 	c.Locals("claims", claims)
 
 	claims = c.Locals("claims").(jwt.MapClaims)
-	println(claims["ID"])
-	userID, err := strconv.ParseInt(fmt.Sprintf("%.0f", claims["id"]), 10, 64)
+	userID, err := strconv.Atoi(fmt.Sprintf("%.0f", claims["ID"]))
 	if err != nil {
 		return c.Status(http.StatusBadRequest).JSON(fiber.Map{"message": err.Error()})
 
