@@ -1,2 +1,0 @@
-DATABASE_URL=root@tcp(localhost:3306)/todolist
-JWT_SECRET=secret

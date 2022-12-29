@@ -4,6 +4,9 @@ import (
 	"database/sql"
 	"log"
 	"os"
+	"todolist/handler"
+	"todolist/repository"
+	"todolist/service"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gofiber/fiber/v2"
@@ -32,6 +35,13 @@ func main() {
 	app.Use(logger.New())
 	app.Use(recover.New())
 
-	// start server
-	log.Fatal(app.Listen(":3000"))
+	todoListRepo := repository.NewTodoRepository(db)
+	todoListSvc := service.NewTodoListService(todoListRepo)
+
+	todohandler := handler.NewGroupHandler(todoListSvc)
+
+	app.Get("/todos", todohandler.GetTodos)
+
+	// start serverlanju
+	log.Fatal(app.Listen(os.Getenv("SERVER_ADDRESS")))
 }
