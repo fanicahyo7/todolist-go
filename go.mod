@@ -9,15 +9,7 @@ require (
 )
 
 require (
-	github.com/golang-migrate/migrate/v4 v4.15.2 // indirect
-	github.com/hashicorp/errwrap v1.1.0 // indirect
-	github.com/hashicorp/go-multierror v1.1.1 // indirect
-	go.uber.org/atomic v1.7.0 // indirect
-)
-
-require (
 	github.com/andybalholm/brotli v1.0.4 // indirect
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/golang-jwt/jwt/v4 v4.4.3
 	github.com/klauspost/compress v1.15.13 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect

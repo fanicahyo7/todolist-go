@@ -2,11 +2,13 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"os"
 	"todolist/handler"
 	"todolist/repository"
 	"todolist/service"
+	"todolist/util"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gofiber/fiber/v2"
@@ -35,12 +37,31 @@ func main() {
 	app.Use(logger.New())
 	app.Use(recover.New())
 
+	// repo
 	todoListRepo := repository.NewTodoRepository(db)
-	todoListSvc := service.NewTodoListService(todoListRepo)
+	user, err := todoListRepo.GetByUserID(15)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		for a := 0; a <= len(user)-1; a++ {
+			fmt.Println(user)
+		}
+	}
 
-	todohandler := handler.NewGroupHandler(todoListSvc)
+	userRepo := repository.NewUserRepository(db)
 
-	app.Get("/todos", todohandler.GetTodos)
+	// service
+	todoListService := service.NewTodoListService(todoListRepo)
+	userService := service.NewUserService(userRepo)
+
+	// handler
+	todohandler := handler.NewGroupHandler(todoListService)
+	userHandler := handler.NewuserHandler(userService)
+
+	// route
+	authGroup := app.Group("/auth", util.JWTAuthMiddleware(os.Getenv("JWT_SECRET")))
+	authGroup.Get("/todos", todohandler.GetTodos)
+	app.Post("/register", userHandler.RegisterUser)
 
 	// start serverlanju
 	log.Fatal(app.Listen(os.Getenv("SERVER_ADDRESS")))
