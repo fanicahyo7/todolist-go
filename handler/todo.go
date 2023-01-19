@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 	"todolist/service"
 
@@ -17,12 +16,13 @@ func NewGroupHandler(todoService service.TodoListService) *todoHandler {
 }
 
 func (h *todoHandler) GetTodos(c *fiber.Ctx) error {
-	id := c.Locals("ID").(int)
-	fmt.Println("ID : ", id)
-
-	todoLists, err := h.todoService.GetByUserID(id)
+	id, ok := c.Locals("id").(float64)
+	if !ok {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"message": "user_id not found"})
+	}
+	todoLists, err := h.todoService.GetByUserID(int(id))
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
 	}
-	return c.Status(200).JSON(fiber.Map{"message": todoLists})
+	return c.Status(200).JSON(fiber.Map{"data": todoLists})
 }

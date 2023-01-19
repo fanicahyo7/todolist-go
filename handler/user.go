@@ -19,12 +19,27 @@ func (h *userHandler) RegisterUser(c *fiber.Ctx) error {
 	var user model.User
 	err := c.BodyParser(&user)
 	if err != nil {
-		return c.Status(fiber.ErrBadRequest.Code).JSON(fiber.Map{"message": err})
+		return c.Status(fiber.ErrBadRequest.Code).JSON(fiber.Map{"message": err.Error()})
 	}
 
 	data, token, err := h.service.RegisterUser(user, user.Password)
 	if err != nil {
-		return c.Status(fiber.ErrBadRequest.Code).JSON(fiber.Map{"message": err})
+		return c.Status(fiber.ErrBadRequest.Code).JSON(fiber.Map{"message": err.Error()})
+	}
+
+	return c.Status(200).JSON(fiber.Map{"message": "register successfully", "data": data, "token": token})
+}
+
+func (h *userHandler) LoginUser(c *fiber.Ctx) error {
+	var user model.UserLoginInput
+	err := c.BodyParser(&user)
+	if err != nil {
+		return c.Status(fiber.ErrBadRequest.Code).JSON(fiber.Map{"message": err.Error()})
+	}
+
+	data, token, err := h.service.LoginUser(user.UsernameOrEmail, user.Password)
+	if err != nil {
+		return c.Status(fiber.ErrBadRequest.Code).JSON(fiber.Map{"message": err.Error()})
 	}
 
 	return c.Status(200).JSON(fiber.Map{"message": "register successfully", "data": data, "token": token})

@@ -30,6 +30,7 @@ func JWTAuthMiddleware(secret string) func(*fiber.Ctx) error {
 		if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 			// set user_id to context locals
 			c.Locals("id", claims["id"])
+			c.Next()
 			return nil
 		} else {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{

@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"os"
 	"todolist/handler"
@@ -39,15 +38,6 @@ func main() {
 
 	// repo
 	todoListRepo := repository.NewTodoRepository(db)
-	user, err := todoListRepo.GetByUserID(15)
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		for a := 0; a <= len(user)-1; a++ {
-			fmt.Println(user)
-		}
-	}
-
 	userRepo := repository.NewUserRepository(db)
 
 	// service
@@ -59,9 +49,11 @@ func main() {
 	userHandler := handler.NewuserHandler(userService)
 
 	// route
-	authGroup := app.Group("/auth", util.JWTAuthMiddleware(os.Getenv("JWT_SECRET")))
-	authGroup.Get("/todos", todohandler.GetTodos)
+	// authGroup := app.Group("/auth", util.JWTAuthMiddleware(os.Getenv("JWT_SECRET")))
+	// authGroup.Get("/todos", todohandler.GetTodos)
+	app.Get("/todos", util.JWTAuthMiddleware(os.Getenv("JWT_SECRET")), todohandler.GetTodos)
 	app.Post("/register", userHandler.RegisterUser)
+	app.Post("/login", userHandler.LoginUser)
 
 	// start serverlanju
 	log.Fatal(app.Listen(os.Getenv("SERVER_ADDRESS")))

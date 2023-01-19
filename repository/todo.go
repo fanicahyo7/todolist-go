@@ -2,7 +2,7 @@ package repository
 
 import (
 	"database/sql"
-	"fmt"
+	"time"
 	"todolist/model"
 )
 
@@ -23,7 +23,7 @@ func NewTodoRepository(db *sql.DB) TodoListRepository {
 }
 
 func (r *todoListRepository) GetByUserID(userID int) ([]model.Todo, error) {
-	rows, err := r.db.Query("SELECT id, title, description, status, created_at, updated_at FROM todos WHERE user_id = ?", userID)
+	rows, err := r.db.Query("SELECT id, user_id, title, description, status, created_at FROM todos WHERE user_id = ?", userID)
 	if err != nil {
 		return nil, err
 	}
@@ -32,12 +32,17 @@ func (r *todoListRepository) GetByUserID(userID int) ([]model.Todo, error) {
 	var todoLists []model.Todo
 	for rows.Next() {
 		var todoList model.Todo
-		err = rows.Scan(&todoList.ID, &todoList.Title, &todoList.Description, &todoList.Status, &todoList.Created, &todoList.Updated)
+		var createdAt []byte
+		err = rows.Scan(&todoList.ID, &todoList.UserID, &todoList.Title, &todoList.Description, &todoList.Status, &createdAt)
 		if err != nil {
 			return todoLists, err
 		}
+		todoList.Created, err = time.Parse("2006-01-02 15:04:05.999999", string(createdAt))
+		if err != nil {
+			return todoLists, err
+		}
+
 		todoLists = append(todoLists, todoList)
 	}
-	fmt.Println("lanjut")
 	return todoLists, nil
 }

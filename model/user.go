@@ -10,3 +10,8 @@ type User struct {
 	Created  time.Time `json:"created_at" db:"created_at"`
 	Updated  time.Time `json:"updated_at" db:"updated_at"`
 }
+
+type UserLoginInput struct {
+	UsernameOrEmail string `json:"username_or_email"`
+	Password        string `json:"password"`
+}
