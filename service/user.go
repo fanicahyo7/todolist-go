@@ -2,7 +2,6 @@ package service
 
 import (
 	"errors"
-	"fmt"
 	"todolist/model"
 	"todolist/repository"
 	"todolist/util"
@@ -11,7 +10,7 @@ import (
 type UserService interface {
 	// GetUserWithPassword(username string, password string) (model.User, error)
 	RegisterUser(user model.User, password string) (model.User, string, error)
-	LoginUser(usernameOrEmail string, password string) (model.User, string, error)
+	LoginUser(usernameOrEmail string, password string) (model.UserResponse, string, error)
 }
 
 type userService struct {
@@ -21,15 +20,6 @@ type userService struct {
 func NewUserService(repo repository.UserRepository) UserService {
 	return &userService{repo: repo}
 }
-
-// func (s *userService) GetUserWithPassword(usernameOrEmail, password string) (model.User, error) {
-// 	user, err := s.repo.GetUserWithPassword(usernameOrEmail, password)
-// 	if err != nil {
-// 		return user, err
-// 	}
-
-// 	return user, nil
-// }
 
 func (s *userService) RegisterUser(user model.User, password string) (model.User, string, error) {
 	pass, err := util.HashPassword(password)
@@ -49,27 +39,32 @@ func (s *userService) RegisterUser(user model.User, password string) (model.User
 	return user, token, nil
 }
 
-func (s *userService) LoginUser(usernameOrEmail string, password string) (model.User, string, error) {
+func (s *userService) LoginUser(usernameOrEmail string, password string) (model.UserResponse, string, error) {
 	userDB, err := s.repo.GetUser(usernameOrEmail)
 	if err != nil {
-		return model.User{}, "", err
+		return model.UserResponse{}, "", err
 	}
 
-	fmt.Println("hasil : ", userDB.Password)
+	passwordFromDB := userDB.Password
 
-	isTrue := util.CheckPasswordHash(userDB.Password, password)
+	isTrue := util.CheckPasswordHash(password, passwordFromDB)
 	if isTrue {
-		user, err := s.repo.GetUserWithPassword(usernameOrEmail, password)
+		token, err := util.CreateJWT(userDB.ID)
 		if err != nil {
-			return model.User{}, "", err
+			return model.UserResponse{}, "", err
 		}
-		token, err := util.CreateJWT(user.ID)
-		if err != nil {
-			return model.User{}, "", err
+
+		userResponse := model.UserResponse{
+			ID:       userDB.ID,
+			Username: userDB.Username,
+			Email:    userDB.Email,
+			Created:  userDB.Created,
+			Updated:  userDB.Updated,
 		}
-		return user, token, nil
+
+		return userResponse, token, nil
 	} else {
-		return model.User{}, "", errors.New("Invalid username or password")
+		return model.UserResponse{}, "", errors.New("invalid username or password")
 	}
 
 }

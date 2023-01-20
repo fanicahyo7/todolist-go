@@ -31,7 +31,7 @@ func (h *userHandler) RegisterUser(c *fiber.Ctx) error {
 }
 
 func (h *userHandler) LoginUser(c *fiber.Ctx) error {
-	var user model.UserLoginInput
+	var user model.UserRequest
 	err := c.BodyParser(&user)
 	if err != nil {
 		return c.Status(fiber.ErrBadRequest.Code).JSON(fiber.Map{"message": err.Error()})
@@ -42,5 +42,5 @@ func (h *userHandler) LoginUser(c *fiber.Ctx) error {
 		return c.Status(fiber.ErrBadRequest.Code).JSON(fiber.Map{"message": err.Error()})
 	}
 
-	return c.Status(200).JSON(fiber.Map{"message": "register successfully", "data": data, "token": token})
+	return c.Status(200).JSON(fiber.Map{"message": "login successfully", "data": data, "token": token})
 }

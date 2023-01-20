@@ -9,7 +9,6 @@ import (
 
 type UserRepository interface {
 	GetByUserID(userID int) (model.User, error)
-	GetUserWithPassword(usernameOrEmail, password string) (model.User, error)
 	GetUser(usernameOrEmail string) (model.User, error)
 	SaveUser(user model.User, passwordhHas string) (model.User, error)
 }
@@ -51,36 +50,26 @@ func (r *userRepository) GetByUserID(userID int) (model.User, error) {
 	return user, nil
 }
 
-func (r *userRepository) GetUserWithPassword(usernameOrEmail, password string) (model.User, error) {
-	var user model.User
-	rows, err := r.db.Query("SELECT id, username FROM users WHERE (username = ? or email = ?) AND password = ?", usernameOrEmail, usernameOrEmail, password)
-	if err != nil {
-		return model.User{}, err
-	}
-	defer rows.Close()
-
-	if rows.Next() {
-		if err := rows.Scan(&user.ID, &user.Username); err != nil {
-			return model.User{}, err
-		}
-
-	} else {
-		return model.User{}, errors.New("user not found")
-	}
-
-	return user, nil
-}
-
 func (r *userRepository) GetUser(usernameOrEmail string) (model.User, error) {
 	var user model.User
-	rows, err := r.db.Query("SELECT id, username, password FROM users WHERE username = ? or email = ? ", usernameOrEmail, usernameOrEmail)
+	var createdAt []byte
+	var updatedAt []byte
+	rows, err := r.db.Query("SELECT id, username, email, password,created_at, updated_at FROM users WHERE username = ? or email = ? ", usernameOrEmail, usernameOrEmail)
 	if err != nil {
 		return model.User{}, err
 	}
 	defer rows.Close()
 
 	if rows.Next() {
-		if err := rows.Scan(&user.ID, &user.Username, &user.Password); err != nil {
+		if err := rows.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &createdAt, &updatedAt); err != nil {
+			return model.User{}, err
+		}
+		user.Created, err = time.Parse("2006-01-02 15:04:05.999999", string(createdAt))
+		if err != nil {
+			return model.User{}, err
+		}
+		user.Updated, err = time.Parse("2006-01-02 15:04:05.999999", string(updatedAt))
+		if err != nil {
 			return model.User{}, err
 		}
 
@@ -125,10 +114,6 @@ func (r *userRepository) SaveUser(user model.User, passwordhHas string) (model.U
 	}
 	return user, nil
 }
-
-// func (r *userRepository) LoginUser(user model.User, passwordhHas string) (model.User, error) {
-
-// }
 
 // func (r *userRepository) RegisterUsers(users []model.User) error {
 // 	tx, err := r.db.Begin()
